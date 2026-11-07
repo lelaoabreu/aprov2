@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentação de Link PME</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f7f6; padding: 20px; }
+        .container { max-width: 500px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; }
+        input, select, textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background-color: #0056b3; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
+        button:hover { background-color: #004494; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Novo Link PME</h2>
+    <form id="docForm">
+        
+        <div class="form-group">
+            <label for="cliente">Nome do Cliente / Razão Social</label>
+            <input type="text" id="cliente" required>
+        </div>
+
+        <div class="form-group">
+            <label for="pppoe">Usuário PPPoE</label>
+            <input type="text" id="pppoe" required>
+        </div>
+
+        <div class="form-group">
+            <label for="vlan_servico">VLAN de Serviço</label>
+            <input type="number" id="vlan_servico" required>
+        </div>
+
+        <div class="form-group">
+            <label for="vlan_gerencia">VLAN de Gerência</label>
+            <input type="number" id="vlan_gerencia">
+        </div>
+
+        <div class="form-group">
+            <label for="meio_fisico">Infraestrutura (Meio Físico)</label>
+            <select id="meio_fisico" required>
+                <option value="">Selecione...</option>
+                <option value="olt">OLT (FTTH/PON)</option>
+                <option value="radio">Rádio Enlace</option>
+                <option value="ptp_fibra">PTP de Fibra (Ponto a Ponto)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="detalhes">Informações Adicionais (Porta, IP, MAC, etc.)</label>
+            <textarea id="detalhes" rows="3"></textarea>
+        </div>
+
+        <button type="submit">Salvar Documentação</button>
+    </form>
+</div>
+
+<script>
+    // Este script captura o clique no botão salvar
+    document.getElementById('docForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Evita que a página recarregue
+
+        // Captura os dados digitados
+        const dadosDoCliente = {
+            cliente: document.getElementById('cliente').value,
+            pppoe: document.getElementById('pppoe').value,
+            vlan_servico: document.getElementById('vlan_servico').value,
+            vlan_gerencia: document.getElementById('vlan_gerencia').value,
+            meio_fisico: document.getElementById('meio_fisico').value,
+            detalhes: document.getElementById('detalhes').value
+        };
+
+        console.log("Dados prontos para serem enviados ao banco de dados:", dadosDoCliente);
+        alert("Dados capturados com sucesso! Pressione F12 para ver no console.");
+    });
+</script>
+
+</body>
+</html>
