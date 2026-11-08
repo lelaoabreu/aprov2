@@ -49,7 +49,7 @@
     <h2>Serviço - Internet PME</h2>
     <form id="docForm">
         
-        <!-- INFORMAÇÕES CADASTRAIS -->
+        <!-- 1. INFORMAÇÕES CADASTRAIS -->
         <fieldset>
             <legend>1. Informações Cadastrais</legend>
             <div class="form-row">
@@ -70,7 +70,7 @@
             </div>
         </fieldset>
 
-        <!-- INFORMAÇÕES DA CONFIGURAÇÃO -->
+        <!-- 2. INFORMAÇÕES DA CONFIGURAÇÃO LÓGICA -->
         <fieldset>
             <legend>2. Informações da Configuração Lógica</legend>
             <div class="form-row">
@@ -83,6 +83,13 @@
                         <option value="/29">/29</option>
                     </select>
                 </div>
+                
+                <!-- NOVO: Campo IP Base (Oculto até selecionar o bloco) -->
+                <div class="form-group oculto" id="container_ip_base">
+                    <label>Endereço IP Base *</label>
+                    <input type="text" id="ip_base" placeholder="Ex: 187.10.20.0" pattern="^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$">
+                </div>
+
                 <div class="form-group">
                     <label>Tipo de Conexão *</label>
                     <select id="tipo_conexao" required>
@@ -90,6 +97,14 @@
                         <option value="PPPoE">PPPoE</option>
                         <option value="Roteamento">Roteamento</option>
                     </select>
+                </div>
+            </div>
+
+            <!-- NOVO: Calculadora de Sub-rede -->
+            <div id="resultado_calculadora" class="form-group-full sub-bloco oculto" style="background-color: #e9f7ef; border-color: #28a745; margin-top: 5px;">
+                <div class="sub-titulo" style="color: #28a745; margin-bottom: 5px;">📍 Calculadora de Sub-rede</div>
+                <div id="detalhes_rede" style="font-family: monospace; font-size: 14px; color: #333; line-height: 1.5;">
+                    <!-- Resultados do Javascript aparecerão aqui -->
                 </div>
             </div>
 
@@ -115,7 +130,7 @@
             </div>
         </fieldset>
 
-        <!-- MEIO DE ACESSO -->
+        <!-- 3. MEIO DE ACESSO -->
         <fieldset>
             <legend>3. Meio de Acesso</legend>
             <div class="form-row">
@@ -130,7 +145,6 @@
                 </div>
             </div>
 
-            <!-- SUB-BLOCO: GPON -->
             <div id="bloco_gpon" class="sub-bloco oculto">
                 <div class="sub-titulo">Infraestrutura GPON</div>
                 <div class="form-row">
@@ -151,7 +165,6 @@
                 </div>
             </div>
 
-            <!-- SUB-BLOCO: PTP -->
             <div id="bloco_ptp" class="sub-bloco oculto">
                 <div class="sub-titulo">Infraestrutura PTP</div>
                 <div class="form-row">
@@ -161,7 +174,6 @@
                 </div>
             </div>
 
-            <!-- SUB-BLOCO: RADIO -->
             <div id="bloco_radio" class="sub-bloco oculto">
                 <div class="sub-titulo">Infraestrutura Rádio</div>
                 <div class="form-row">
@@ -188,7 +200,7 @@
             </div>
         </fieldset>
 
-        <!-- SISTEMAS -->
+        <!-- 4. SISTEMAS -->
         <fieldset>
             <legend>4. Sistemas</legend>
             <div class="form-row">
@@ -197,7 +209,7 @@
             </div>
         </fieldset>
 
-        <!-- VALIDAÇÃO -->
+        <!-- 5. VALIDAÇÃO -->
         <fieldset>
             <legend>5. Processo de Validação</legend>
             <div class="form-row">
@@ -256,7 +268,7 @@
     const auth = getAuth(app);
     let tecnicoEmail = "";
 
-    // Proteção
+    // Proteção de Rota
     onAuthStateChanged(auth, (user) => {
         if (user) {
             tecnicoEmail = user.email;
@@ -270,7 +282,70 @@
         signOut(auth).then(() => window.location.href = "login.html");
     });
 
-    // Lógica - Tipo de Conexão
+    // --- FUNÇÕES DA CALCULADORA IP ---
+    function ip2long(ip) {
+        return ip.split('.').reduce((ipInt, octet) => (ipInt << 8) + parseInt(octet, 10), 0) >>> 0;
+    }
+
+    function long2ip(ipInt) {
+        return ( (ipInt >>> 24) + '.' + (ipInt >> 16 & 255) + '.' + (ipInt >> 8 & 255) + '.' + (ipInt & 255) );
+    }
+
+    function calcularSubrede() {
+        const bloco = document.getElementById('bloco_ip').value;
+        const ip = document.getElementById('ip_base').value;
+        const containerCalc = document.getElementById('resultado_calculadora');
+        const detalhes = document.getElementById('detalhes_rede');
+
+        const ipRegex = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+
+        if (!bloco || !ip || !ipRegex.test(ip)) {
+            containerCalc.classList.add('oculto');
+            return;
+        }
+
+        if (bloco === '/32') {
+            containerCalc.classList.remove('oculto');
+            detalhes.innerHTML = `<strong>IP Atribuído:</strong> ${ip}<br><small>Rede Host Único (/32)</small>`;
+            return;
+        }
+
+        let cidr = parseInt(bloco.replace('/', ''));
+        let mask = 0xFFFFFFFF << (32 - cidr) >>> 0;
+        let ipLong = ip2long(ip);
+
+        let networkLong = (ipLong & mask) >>> 0;
+        let broadcastLong = (networkLong | ~mask) >>> 0;
+
+        containerCalc.classList.remove('oculto');
+        detalhes.innerHTML = `
+            <strong>Rede:</strong> ${long2ip(networkLong)}${bloco} (Máscara: ${long2ip(mask)})<br>
+            <strong>Gateway (1º IP):</strong> ${long2ip(networkLong + 1)}<br>
+            <strong>Último IP Útil:</strong> ${long2ip(broadcastLong - 1)}<br>
+            <strong>Broadcast:</strong> ${long2ip(broadcastLong)}
+        `;
+    }
+
+    // Exibe o input de IP Base ao escolher o Bloco e recalcula
+    document.getElementById('bloco_ip').addEventListener('change', function(e) {
+        const containerIp = document.getElementById('container_ip_base');
+        const inputIp = document.getElementById('ip_base');
+        
+        if (e.target.value) {
+            containerIp.classList.remove('oculto');
+            inputIp.required = true;
+        } else {
+            containerIp.classList.add('oculto');
+            inputIp.required = false;
+            inputIp.value = '';
+        }
+        calcularSubrede();
+    });
+
+    // Recalcula a sub-rede enquanto o usuário digita o IP
+    document.getElementById('ip_base').addEventListener('input', calcularSubrede);
+
+    // --- LÓGICA DE EXIBIÇÃO DE CAMPOS ---
     document.getElementById('tipo_conexao').addEventListener('change', function(e) {
         document.getElementById('bloco_pppoe').classList.add('oculto');
         document.getElementById('bloco_roteamento').classList.add('oculto');
@@ -278,7 +353,6 @@
         else if (e.target.value === 'Roteamento') document.getElementById('bloco_roteamento').classList.remove('oculto');
     });
 
-    // Lógica - Meio de Acesso
     document.getElementById('meio_acesso').addEventListener('change', function(e) {
         document.getElementById('bloco_gpon').classList.add('oculto');
         document.getElementById('bloco_ptp').classList.add('oculto');
@@ -288,7 +362,7 @@
         else if (e.target.value === 'Radio') document.getElementById('bloco_radio').classList.remove('oculto');
     });
 
-    // Submit
+    // --- ENVIO AO FIREBASE ---
     document.getElementById('docForm').addEventListener('submit', async function(event) {
         event.preventDefault();
         const btnSalvar = document.getElementById('btnSalvar');
@@ -301,8 +375,7 @@
             if (inputFoto.files.length > 0) {
                 btnSalvar.innerText = "Enviando evidência (1/2)...";
                 const arquivo = inputFoto.files[0];
-                const nomeArquivo = Date.now() + "_" + arquivo.name;
-                const storageRef = ref(storage, 'fotos_clientes/' + nomeArquivo);
+                const storageRef = ref(storage, 'fotos_clientes/' + Date.now() + "_" + arquivo.name);
                 await uploadBytes(storageRef, arquivo);
                 fotoUrl = await getDownloadURL(storageRef);
             }
@@ -310,13 +383,11 @@
             btnSalvar.innerText = "Salvando dados no banco (2/2)...";
 
             const payload = {
-                // Metadados
                 servico_tipo: "Internet PME",
                 tecnico_responsavel: tecnicoEmail,
                 data_cadastro: new Date().toISOString(),
                 foto_link: fotoUrl,
 
-                // 1. Cadastrais
                 os: document.getElementById('os').value,
                 cnl: document.getElementById('cnl').value,
                 etiqueta: document.getElementById('etiqueta').value,
@@ -326,8 +397,8 @@
                 gerente: document.getElementById('gerente').value,
                 email_cliente: document.getElementById('email_cliente').value,
 
-                // 2. Configuração Lógica
                 bloco_ip: document.getElementById('bloco_ip').value,
+                ip_base: document.getElementById('ip_base').value, // IP salvo aqui
                 tipo_conexao: document.getElementById('tipo_conexao').value,
                 pppoe_user: document.getElementById('pppoe_user').value,
                 pppoe_pass: document.getElementById('pppoe_pass').value,
@@ -337,7 +408,6 @@
                 rot_vlan: document.getElementById('rot_vlan').value,
                 rot_bloco: document.getElementById('rot_bloco').value,
 
-                // 3. Meio de Acesso
                 meio_acesso: document.getElementById('meio_acesso').value,
                 gpon_olt_nome: document.getElementById('gpon_olt_nome').value,
                 gpon_olt_ip: document.getElementById('gpon_olt_ip').value,
@@ -365,11 +435,9 @@
                 cpe_sn: document.getElementById('cpe_sn').value,
                 observacao: document.getElementById('observacao').value,
 
-                // 4. Sistemas
                 link_plataforma: document.getElementById('link_plataforma').value,
                 link_zabbix: document.getElementById('link_zabbix').value,
 
-                // 5. Validação
                 ti_local: document.getElementById('ti_local').value,
                 tipo_validacao: document.getElementById('tipo_validacao').value,
                 validador_cliente: document.getElementById('validador_cliente').value,
@@ -380,14 +448,13 @@
             alert("Documentação PME salva com sucesso!");
             
             document.getElementById('docForm').reset();
-            
-            // Oculta os blocos dinâmicos novamente
+            document.getElementById('container_ip_base').classList.add('oculto');
+            document.getElementById('resultado_calculadora').classList.add('oculto');
             document.getElementById('bloco_pppoe').classList.add('oculto');
             document.getElementById('bloco_roteamento').classList.add('oculto');
             document.getElementById('bloco_gpon').classList.add('oculto');
             document.getElementById('bloco_ptp').classList.add('oculto');
             document.getElementById('bloco_radio').classList.add('oculto');
-            
             window.scrollTo(0, 0);
 
         } catch (erro) {
