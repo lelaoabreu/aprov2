@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentação - Internet PME</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f7f6; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .cabecalho-sistema { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 20px; }
+        .info-usuario { font-size: 14px; color: #555; }
+        .btn-sair { color: #dc3545; text-decoration: none; font-weight: bold; cursor: pointer; }
+        .btn-sair:hover { text-decoration: underline; }
+        h2 { text-align: center; color: #333; margin-bottom: 20px; }
+        
+        fieldset { border: 1px solid #ddd; border-radius: 5px; padding: 15px; margin-bottom: 20px; background-color: #fafafa; }
+        legend { font-weight: bold; background: #0056b3; color: white; padding: 5px 15px; border-radius: 4px; }
+        
+        .form-row { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; width: 100%; }
+        .form-group { flex: 1; min-width: 200px; }
+        .form-group-full { width: 100%; margin-bottom: 15px; }
+        
+        label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; color: #444; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
+        input[type="file"] { padding: 7px; background: #fff; }
+        
+        button { width: 100%; padding: 12px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; font-weight: bold; margin-top: 10px; }
+        button:hover { background-color: #218838; }
+        button:disabled { background-color: #cccccc; cursor: not-allowed; }
+        
+        .btn-link { display: block; text-align: center; margin-top: 15px; color: #0056b3; text-decoration: none; }
+        
+        .oculto { display: none !important; }
+        .sub-bloco { margin-top: 10px; padding-top: 15px; border-top: 1px dashed #ccc; width: 100%; background: #fdfdfd; padding-left: 10px; padding-right: 10px; box-sizing: border-box;}
+        .sub-titulo { font-weight: bold; color: #0056b3; margin-bottom: 15px; font-size: 15px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="cabecalho-sistema">
+        <span class="info-usuario">Técnico: <strong id="usuarioLogado">Verificando...</strong></span>
+        <div>
+            <a href="home.html" class="btn-link" style="display: inline; margin-right: 15px;">← Voltar ao Menu</a>
+            <a id="btnSair" class="btn-sair">Sair</a>
+        </div>
+    </div>
+
+    <h2>Serviço - Internet PME</h2>
+    <form id="docForm">
+        
+        <!-- INFORMAÇÕES CADASTRAIS -->
+        <fieldset>
+            <legend>1. Informações Cadastrais</legend>
+            <div class="form-row">
+                <div class="form-group"><label>OS *</label><input type="text" id="os" required></div>
+                <div class="form-group"><label>CNL *</label><input type="text" id="cnl" required></div>
+                <div class="form-group"><label>Etiqueta do Serviço *</label><input type="text" id="etiqueta" required></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Nome do Cliente *</label><input type="text" id="cliente_nome" required></div>
+                <div class="form-group"><label>CNPJ *</label><input type="text" id="cnpj" required></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Endereço Completo *</label><input type="text" id="endereco" required></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Gerente de Relacionamento</label><input type="text" id="gerente"></div>
+                <div class="form-group"><label>Email do Cliente</label><input type="email" id="email_cliente"></div>
+            </div>
+        </fieldset>
+
+        <!-- INFORMAÇÕES DA CONFIGURAÇÃO -->
+        <fieldset>
+            <legend>2. Informações da Configuração Lógica</legend>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Bloco de IPv4 Entregue *</label>
+                    <select id="bloco_ip" required>
+                        <option value="">Selecione...</option>
+                        <option value="/32">/32</option>
+                        <option value="/30">/30</option>
+                        <option value="/29">/29</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Tipo de Conexão *</label>
+                    <select id="tipo_conexao" required>
+                        <option value="">Selecione...</option>
+                        <option value="PPPoE">PPPoE</option>
+                        <option value="Roteamento">Roteamento</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- SUB-BLOCO: PPPoE -->
+            <div id="bloco_pppoe" class="sub-bloco oculto">
+                <div class="sub-titulo">Parâmetros PPPoE</div>
+                <div class="form-row">
+                    <div class="form-group"><label>Username PPPoE</label><input type="text" id="pppoe_user"></div>
+                    <div class="form-group"><label>Password PPPoE</label><input type="text" id="pppoe_pass"></div>
+                    <div class="form-group"><label>Concentrador PPPoE</label><input type="text" id="pppoe_concentrador"></div>
+                    <div class="form-group"><label>VLAN de PPPoE</label><input type="text" id="pppoe_vlan"></div>
+                </div>
+            </div>
+
+            <!-- SUB-BLOCO: ROTEAMENTO -->
+            <div id="bloco_roteamento" class="sub-bloco oculto">
+                <div class="sub-titulo">Parâmetros de Roteamento</div>
+                <div class="form-row">
+                    <div class="form-group"><label>PE de Roteamento</label><input type="text" id="rot_pe"></div>
+                    <div class="form-group"><label>VLAN de Roteamento</label><input type="text" id="rot_vlan"></div>
+                    <div class="form-group"><label>Bloco Privado de Roteamento</label><input type="text" id="rot_bloco"></div>
+                </div>
+            </div>
+        </fieldset>
+
+        <!-- MEIO DE ACESSO -->
+        <fieldset>
+            <legend>3. Meio de Acesso</legend>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Tecnologia *</label>
+                    <select id="meio_acesso" required>
+                        <option value="">Selecione...</option>
+                        <option value="GPON">GPON</option>
+                        <option value="PTP">PTP</option>
+                        <option value="Radio">Rádio</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- SUB-BLOCO: GPON -->
+            <div id="bloco_gpon" class="sub-bloco oculto">
+                <div class="sub-titulo">Infraestrutura GPON</div>
+                <div class="form-row">
+                    <div class="form-group"><label>Nome da OLT</label><input type="text" id="gpon_olt_nome"></div>
+                    <div class="form-group"><label>IP da OLT</label><input type="text" id="gpon_olt_ip"></div>
+                    <div class="form-group"><label>Modelo da OLT</label><input type="text" id="gpon_olt_modelo"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>CTO Utilizada</label><input type="text" id="gpon_cto"></div>
+                    <div class="form-group"><label>SLOT da OLT</label><input type="text" id="gpon_slot"></div>
+                    <div class="form-group"><label>PON da OLT</label><input type="text" id="gpon_pon"></div>
+                    <div class="form-group"><label>Posição da OLT</label><input type="text" id="gpon_posicao"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Marca da ONU/ONT</label><input type="text" id="gpon_onu_marca"></div>
+                    <div class="form-group"><label>MAC da ONU/ONT</label><input type="text" id="gpon_onu_mac"></div>
+                    <div class="form-group"><label>SN da ONU/ONT</label><input type="text" id="gpon_onu_sn"></div>
+                </div>
+            </div>
+
+            <!-- SUB-BLOCO: PTP -->
+            <div id="bloco_ptp" class="sub-bloco oculto">
+                <div class="sub-titulo">Infraestrutura PTP</div>
+                <div class="form-row">
+                    <div class="form-group"><label>Nome do Upe</label><input type="text" id="ptp_upe_nome"></div>
+                    <div class="form-group"><label>IP do Upe</label><input type="text" id="ptp_upe_ip"></div>
+                    <div class="form-group"><label>Interface de Entrega</label><input type="text" id="ptp_interface"></div>
+                </div>
+            </div>
+
+            <!-- SUB-BLOCO: RADIO -->
+            <div id="bloco_radio" class="sub-bloco oculto">
+                <div class="sub-titulo">Infraestrutura Rádio</div>
+                <div class="form-row">
+                    <div class="form-group"><label>IP do AP de Entrega</label><input type="text" id="radio_ip_ap"></div>
+                    <div class="form-group"><label>IP do Station de Entrega</label><input type="text" id="radio_ip_station"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>SSID</label><input type="text" id="radio_ssid"></div>
+                    <div class="form-group"><label>Frequência</label><input type="text" id="radio_freq"></div>
+                    <div class="form-group"><label>MAC do Station</label><input type="text" id="radio_mac_station"></div>
+                </div>
+            </div>
+
+            <div class="sub-bloco" style="border-top: none; padding-top: 0; margin-top: 20px;">
+                <div class="form-row">
+                    <div class="form-group"><label>Modelo da CPE</label><input type="text" id="cpe_modelo"></div>
+                    <div class="form-group"><label>MAC da CPE</label><input type="text" id="cpe_mac"></div>
+                    <div class="form-group"><label>SN da CPE</label><input type="text" id="cpe_sn"></div>
+                </div>
+                <div class="form-group-full">
+                    <label>Observação</label>
+                    <textarea id="observacao" rows="3"></textarea>
+                </div>
+            </div>
+        </fieldset>
+
+        <!-- SISTEMAS -->
+        <fieldset>
+            <legend>4. Sistemas</legend>
+            <div class="form-row">
+                <div class="form-group"><label>Link da Plataforma</label><input type="url" id="link_plataforma" placeholder="https://..."></div>
+                <div class="form-group"><label>Link do Mapa do Zabbix</label><input type="url" id="link_zabbix" placeholder="https://..."></div>
+            </div>
+        </fieldset>
+
+        <!-- VALIDAÇÃO -->
+        <fieldset>
+            <legend>5. Processo de Validação</legend>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>TI estava no local? *</label>
+                    <select id="ti_local" required>
+                        <option value="">Selecione...</option>
+                        <option value="Sim">Sim</option>
+                        <option value="Não">Não</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Validação realizada por: *</label>
+                    <select id="tipo_validacao" required>
+                        <option value="">Selecione...</option>
+                        <option value="WhatsApp">WhatsApp</option>
+                        <option value="Telefone">Telefone</option>
+                        <option value="Presencial">Presencialmente</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Validador pelo Cliente (Nome)</label><input type="text" id="validador_cliente"></div>
+                <div class="form-group"><label>Validador pelo Técnico de Campo</label><input type="text" id="validador_tecnico"></div>
+            </div>
+            
+            <div class="form-group-full" style="margin-top: 15px; border-top: 1px dashed #ccc; padding-top: 15px;">
+                <label>Foto / Evidência (Opcional)</label>
+                <input type="file" id="foto_instalacao" accept="image/*">
+            </div>
+        </fieldset>
+
+        <button type="submit" id="btnSalvar">Salvar Documentação PME</button>
+    </form>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+    // ⚠️ COLE AQUI AS SUAS CHAVES DO FIREBASE
+    const firebaseConfig = {
+        apiKey: "SUA_API_KEY_AQUI",
+        authDomain: "seu-projeto.firebaseapp.com",
+        projectId: "seu-projeto",
+        storageBucket: "seu-projeto.appspot.com",
+        messagingSenderId: "123456789",
+        appId: "1:123456789:web:abcdef"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+    const auth = getAuth(app);
+    let tecnicoEmail = "";
+
+    // Proteção
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            tecnicoEmail = user.email;
+            document.getElementById('usuarioLogado').innerText = tecnicoEmail.split('@')[0];
+        } else {
+            window.location.href = "login.html";
+        }
+    });
+
+    document.getElementById('btnSair').addEventListener('click', () => {
+        signOut(auth).then(() => window.location.href = "login.html");
+    });
+
+    // Lógica - Tipo de Conexão
+    document.getElementById('tipo_conexao').addEventListener('change', function(e) {
+        document.getElementById('bloco_pppoe').classList.add('oculto');
+        document.getElementById('bloco_roteamento').classList.add('oculto');
+        if (e.target.value === 'PPPoE') document.getElementById('bloco_pppoe').classList.remove('oculto');
+        else if (e.target.value === 'Roteamento') document.getElementById('bloco_roteamento').classList.remove('oculto');
+    });
+
+    // Lógica - Meio de Acesso
+    document.getElementById('meio_acesso').addEventListener('change', function(e) {
+        document.getElementById('bloco_gpon').classList.add('oculto');
+        document.getElementById('bloco_ptp').classList.add('oculto');
+        document.getElementById('bloco_radio').classList.add('oculto');
+        if (e.target.value === 'GPON') document.getElementById('bloco_gpon').classList.remove('oculto');
+        else if (e.target.value === 'PTP') document.getElementById('bloco_ptp').classList.remove('oculto');
+        else if (e.target.value === 'Radio') document.getElementById('bloco_radio').classList.remove('oculto');
+    });
+
+    // Submit
+    document.getElementById('docForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
+        const btnSalvar = document.getElementById('btnSalvar');
+        btnSalvar.disabled = true;
+
+        try {
+            let fotoUrl = null;
+            const inputFoto = document.getElementById('foto_instalacao');
+
+            if (inputFoto.files.length > 0) {
+                btnSalvar.innerText = "Enviando evidência (1/2)...";
+                const arquivo = inputFoto.files[0];
+                const nomeArquivo = Date.now() + "_" + arquivo.name;
+                const storageRef = ref(storage, 'fotos_clientes/' + nomeArquivo);
+                await uploadBytes(storageRef, arquivo);
+                fotoUrl = await getDownloadURL(storageRef);
+            }
+
+            btnSalvar.innerText = "Salvando dados no banco (2/2)...";
+
+            const payload = {
+                // Metadados
+                servico_tipo: "Internet PME",
+                tecnico_responsavel: tecnicoEmail,
+                data_cadastro: new Date().toISOString(),
+                foto_link: fotoUrl,
+
+                // 1. Cadastrais
+                os: document.getElementById('os').value,
+                cnl: document.getElementById('cnl').value,
+                etiqueta: document.getElementById('etiqueta').value,
+                cliente_nome: document.getElementById('cliente_nome').value,
+                cnpj: document.getElementById('cnpj').value,
+                endereco: document.getElementById('endereco').value,
+                gerente: document.getElementById('gerente').value,
+                email_cliente: document.getElementById('email_cliente').value,
+
+                // 2. Configuração Lógica
+                bloco_ip: document.getElementById('bloco_ip').value,
+                tipo_conexao: document.getElementById('tipo_conexao').value,
+                pppoe_user: document.getElementById('pppoe_user').value,
+                pppoe_pass: document.getElementById('pppoe_pass').value,
+                pppoe_concentrador: document.getElementById('pppoe_concentrador').value,
+                pppoe_vlan: document.getElementById('pppoe_vlan').value,
+                rot_pe: document.getElementById('rot_pe').value,
+                rot_vlan: document.getElementById('rot_vlan').value,
+                rot_bloco: document.getElementById('rot_bloco').value,
+
+                // 3. Meio de Acesso
+                meio_acesso: document.getElementById('meio_acesso').value,
+                gpon_olt_nome: document.getElementById('gpon_olt_nome').value,
+                gpon_olt_ip: document.getElementById('gpon_olt_ip').value,
+                gpon_olt_modelo: document.getElementById('gpon_olt_modelo').value,
+                gpon_cto: document.getElementById('gpon_cto').value,
+                gpon_slot: document.getElementById('gpon_slot').value,
+                gpon_pon: document.getElementById('gpon_pon').value,
+                gpon_posicao: document.getElementById('gpon_posicao').value,
+                gpon_onu_marca: document.getElementById('gpon_onu_marca').value,
+                gpon_onu_mac: document.getElementById('gpon_onu_mac').value,
+                gpon_onu_sn: document.getElementById('gpon_onu_sn').value,
+                
+                ptp_upe_nome: document.getElementById('ptp_upe_nome').value,
+                ptp_upe_ip: document.getElementById('ptp_upe_ip').value,
+                ptp_interface: document.getElementById('ptp_interface').value,
+                
+                radio_ip_ap: document.getElementById('radio_ip_ap').value,
+                radio_ip_station: document.getElementById('radio_ip_station').value,
+                radio_ssid: document.getElementById('radio_ssid').value,
+                radio_freq: document.getElementById('radio_freq').value,
+                radio_mac_station: document.getElementById('radio_mac_station').value,
+                
+                cpe_modelo: document.getElementById('cpe_modelo').value,
+                cpe_mac: document.getElementById('cpe_mac').value,
+                cpe_sn: document.getElementById('cpe_sn').value,
+                observacao: document.getElementById('observacao').value,
+
+                // 4. Sistemas
+                link_plataforma: document.getElementById('link_plataforma').value,
+                link_zabbix: document.getElementById('link_zabbix').value,
+
+                // 5. Validação
+                ti_local: document.getElementById('ti_local').value,
+                tipo_validacao: document.getElementById('tipo_validacao').value,
+                validador_cliente: document.getElementById('validador_cliente').value,
+                validador_tecnico: document.getElementById('validador_tecnico').value
+            };
+
+            await addDoc(collection(db, "clientes_pme"), payload);
+            alert("Documentação PME salva com sucesso!");
+            
+            document.getElementById('docForm').reset();
+            
+            // Oculta os blocos dinâmicos novamente
+            document.getElementById('bloco_pppoe').classList.add('oculto');
+            document.getElementById('bloco_roteamento').classList.add('oculto');
+            document.getElementById('bloco_gpon').classList.add('oculto');
+            document.getElementById('bloco_ptp').classList.add('oculto');
+            document.getElementById('bloco_radio').classList.add('oculto');
+            
+            window.scrollTo(0, 0);
+
+        } catch (erro) {
+            console.error("Erro ao salvar:", erro);
+            alert("Ocorreu um erro ao salvar os dados.");
+        } finally {
+            btnSalvar.disabled = false;
+            btnSalvar.innerText = "Salvar Documentação PME";
+        }
+    });
+</script>
+
+</body>
+</html>
