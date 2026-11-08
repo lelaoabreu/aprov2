@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Links PME</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f7f6; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); overflow-x: auto; }
+        
+        .cabecalho-sistema { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 20px; }
+        .info-usuario { font-size: 14px; color: #555; }
+        .btn-sair { color: #dc3545; text-decoration: none; font-weight: bold; cursor: pointer; }
+        .btn-sair:hover { text-decoration: underline; }
+
+        .acoes-topo { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+        .barra-pesquisa { flex: 1; min-width: 300px; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 15px; }
+        .btn-voltar { text-decoration: none; background-color: #6c757d; color: white; padding: 10px 15px; border-radius: 4px; font-weight: bold; }
+        .btn-voltar:hover { background-color: #5a6268; }
+
+        table { width: 100%; border-collapse: collapse; min-width: 900px; }
+        th, td { border: 1px solid #ddd; padding: 12px 10px; text-align: left; font-size: 14px; }
+        th { background-color: #0056b3; color: white; white-space: nowrap; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        tr:hover { background-color: #f1f1f1; }
+        
+        .status-ativo { color: green; font-weight: bold; }
+        .status-suspenso { color: orange; font-weight: bold; }
+        .status-cancelado { color: red; font-weight: bold; }
+        .btn-foto { color: #0056b3; text-decoration: none; font-size: 13px; font-weight: bold; }
+        .btn-foto:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="cabecalho-sistema">
+        <span class="info-usuario">Técnico: <strong id="usuarioLogado">Verificando...</strong></span>
+        <a id="btnSair" class="btn-sair">Sair do Sistema</a>
+    </div>
+
+    <h2>Links PME Cadastrados</h2>
+    
+    <div class="acoes-topo">
+        <a href="index.html" class="btn-voltar">← Novo Cadastro</a>
+        <input type="text" id="campoPesquisa" class="barra-pesquisa" placeholder="Pesquisar por cliente, IP ou PPPoE...">
+    </div>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Cliente</th>
+                <th>Status</th>
+                <th>PPPoE</th>
+                <th>IP Fixo</th>
+                <th>Infraestrutura</th>
+                <th>Técnico</th>
+                <th>Evidência</th>
+            </tr>
+        </thead>
+        <tbody id="tabelaClientes">
+            <tr>
+                <td colspan="7" style="text-align: center;">Carregando dados do Firebase...</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+    // ⚠️ COLE AQUI AS SUAS CHAVES DO FIREBASE
+    const firebaseConfig = {
+	apiKey: "AIzaSyAQz3Eup4L9zBinD3igcJ-bzMp71DHhO3Y",
+	authDomain: "caes-5850d.firebaseapp.com",
+	projectId: "caes-5850d",
+	storageBucket: "caes-5850d.firebasestorage.app",
+	messagingSenderId: "78167199590",
+	appId: "1:78167199590:web:31799b57fb5846130cc2a7"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    // Proteção de Rota
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            document.getElementById('usuarioLogado').innerText = user.email;
+            carregarDados(); // Só carrega os dados se estiver logado
+        } else {
+            window.location.href = "login.html";
+        }
+    });
+
+    document.getElementById('btnSair').addEventListener('click', () => {
+        signOut(auth).then(() => window.location.href = "login.html");
+    });
+
+    // Função de Pesquisa / Filtro na Tabela
+    document.getElementById('campoPesquisa').addEventListener('keyup', function() {
+        let filtro = this.value.toLowerCase();
+        let linhas = document.querySelectorAll('#tabelaClientes tr');
+        
+        linhas.forEach(linha => {
+            // Verifica o texto de cada linha. Se não tiver os dados da pesquisa, esconde a linha.
+            let textoLinha = linha.innerText.toLowerCase();
+            linha.style.display = textoLinha.includes(filtro) ? '' : 'none';
+        });
+    });
+
+    async function carregarDados() {
+        try {
+            const q = query(collection(db, "clientes_pme"), orderBy("data_cadastro", "desc"));
+            const querySnapshot = await getDocs(q);
+            const tbody = document.getElementById('tabelaClientes');
+            tbody.innerHTML = ''; 
+
+            if(querySnapshot.empty) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Nenhum cliente cadastrado.</td></tr>';
+                return;
+            }
+
+            querySnapshot.forEach((doc) => {
+                const cliente = doc.data();
+                
+                let statusClass = '';
+                if(cliente.status === 'Ativo') statusClass = 'status-ativo';
+                else if(cliente.status === 'Suspenso') statusClass = 'status-suspenso';
+                else if(cliente.status === 'Cancelado') statusClass = 'status-cancelado';
+
+                const ipFixo = cliente.ip_fixo ? cliente.ip_fixo : '-';
+                const meioFisico = cliente.meio_fisico ? cliente.meio_fisico.toUpperCase() : '-';
+                const tecnico = cliente.tecnico_responsavel ? cliente.tecnico_responsavel.split('@')[0] : 'Desconhecido';
+                
+                // Cria o link para a foto se ela existir
+                const fotoHtml = cliente.foto_link 
+                    ? `<a href="${cliente.foto_link}" target="_blank" class="btn-foto">📷 Ver Foto</a>` 
+                    : '-';
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${cliente.cliente}</strong></td>
+                        <td class="${statusClass}">${cliente.status}</td>
+                        <td>${cliente.pppoe}</td>
+                        <td>${ipFixo}</td>
+                        <td>${meioFisico}</td>
+                        <td>${tecnico}</td>
+                        <td>${fotoHtml}</td>
+                    </tr>
+                `;
+            });
+        } catch (erro) {
+            console.error("Erro ao buscar dados:", erro);
+            document.getElementById('tabelaClientes').innerHTML = '<tr><td colspan="7" style="text-align: center; color: red;">Erro de permissão ou conexão.</td></tr>';
+        }
+    }
+</script>
+
+</body>
+</html>

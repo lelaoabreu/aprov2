@@ -6,76 +6,215 @@
     <title>Documentação de Link PME</title>
     <style>
         body { font-family: Arial, sans-serif; background-color: #f4f7f6; padding: 20px; }
-        .container { max-width: 500px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; font-weight: bold; margin-bottom: 5px; }
-        input, select, textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        button { width: 100%; padding: 10px; background-color: #0056b3; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
-        button:hover { background-color: #004494; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .cabecalho-sistema { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 20px; }
+        .info-usuario { font-size: 14px; color: #555; }
+        .btn-sair { color: #dc3545; text-decoration: none; font-weight: bold; cursor: pointer; }
+        .btn-sair:hover { text-decoration: underline; }
+        h2 { text-align: center; color: #333; margin-bottom: 20px; }
+        fieldset { border: 1px solid #ddd; border-radius: 5px; padding: 15px; margin-bottom: 20px; background-color: #fafafa; }
+        legend { font-weight: bold; background: #0056b3; color: white; padding: 5px 15px; border-radius: 4px; }
+        .form-row { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; width: 100%; }
+        .form-group { flex: 1; min-width: 250px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; color: #444; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        input[type="file"] { padding: 7px; background: #fff; }
+        button { width: 100%; padding: 12px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; font-weight: bold; margin-top: 10px; }
+        button:hover { background-color: #218838; }
+        button:disabled { background-color: #cccccc; cursor: not-allowed; }
+        .btn-link { display: block; text-align: center; margin-top: 15px; color: #0056b3; text-decoration: none; }
+        .oculto { display: none !important; }
+        .sub-bloco { margin-top: 10px; padding-top: 15px; border-top: 1px dashed #ccc; width: 100%; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Novo Link PME</h2>
+    <div class="cabecalho-sistema">
+        <span class="info-usuario">Técnico: <strong id="usuarioLogado">Verificando...</strong></span>
+        <a id="btnSair" class="btn-sair">Sair do Sistema</a>
+    </div>
+
+    <h2>Documentação de Link PME</h2>
     <form id="docForm">
         
-        <div class="form-group">
-            <label for="cliente">Nome do Cliente / Razão Social</label>
-            <input type="text" id="cliente" required>
-        </div>
+        <fieldset>
+            <legend>Comercial e Contato</legend>
+            <div class="form-row">
+                <div class="form-group"><label for="cliente">Razão Social / Cliente *</label><input type="text" id="cliente" required></div>
+                <div class="form-group"><label for="status">Status do Link *</label>
+                    <select id="status" required>
+                        <option value="Ativo">Ativo</option>
+                        <option value="Suspenso">Suspenso</option>
+                        <option value="Cancelado">Cancelado</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label for="contato_tecnico">Contato Técnico (WhatsApp)</label><input type="text" id="contato_tecnico"></div>
+                <div class="form-group"><label for="plano">Plano Contratado *</label><input type="text" id="plano" required></div>
+            </div>
+        </fieldset>
 
-        <div class="form-group">
-            <label for="pppoe">Usuário PPPoE</label>
-            <input type="text" id="pppoe" required>
-        </div>
+        <fieldset>
+            <legend>Configurações Lógicas (Rede)</legend>
+            <div class="form-row">
+                <div class="form-group"><label for="pppoe">Usuário PPPoE *</label><input type="text" id="pppoe" required></div>
+                <div class="form-group"><label for="ip_fixo">Endereço IP Fixo</label><input type="text" id="ip_fixo"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label for="vlan_servico">VLAN de Serviço *</label><input type="number" id="vlan_servico" required></div>
+                <div class="form-group"><label for="vlan_gerencia">VLAN de Gerência</label><input type="number" id="vlan_gerencia"></div>
+            </div>
+        </fieldset>
 
-        <div class="form-group">
-            <label for="vlan_servico">VLAN de Serviço</label>
-            <input type="number" id="vlan_servico" required>
-        </div>
+        <fieldset>
+            <legend>Infraestrutura e Equipamentos</legend>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="meio_fisico">Meio Físico *</label>
+                    <select id="meio_fisico" required>
+                        <option value="">Selecione...</option>
+                        <option value="OLT">OLT (FTTH/PON)</option>
+                        <option value="Rádio">Rádio Enlace</option>
+                        <option value="PTP">PTP de Fibra</option>
+                    </select>
+                </div>
+                <div class="form-group"><label for="mac_address">MAC Address</label><input type="text" id="mac_address"></div>
+            </div>
 
-        <div class="form-group">
-            <label for="vlan_gerencia">VLAN de Gerência</label>
-            <input type="number" id="vlan_gerencia">
-        </div>
+            <div id="bloco_olt" class="form-row sub-bloco oculto">
+                <div class="form-group"><label>CTO e Porta</label><input type="text" id="olt_cto" placeholder="Ex: CTO 05 - Porta 08"></div>
+                <div class="form-group"><label>Sinal Óptico (RX)</label><input type="text" id="olt_sinal" placeholder="Ex: -21.5 dBm"></div>
+            </div>
 
-        <div class="form-group">
-            <label for="meio_fisico">Infraestrutura (Meio Físico)</label>
-            <select id="meio_fisico" required>
-                <option value="">Selecione...</option>
-                <option value="olt">OLT (FTTH/PON)</option>
-                <option value="radio">Rádio Enlace</option>
-                <option value="ptp_fibra">PTP de Fibra (Ponto a Ponto)</option>
-            </select>
-        </div>
+            <div id="bloco_radio" class="form-row sub-bloco oculto">
+                <div class="form-group"><label>SSID da Torre (Painel)</label><input type="text" id="radio_ssid" placeholder="Ex: POP_CENTRO_PAINEL_1"></div>
+                <div class="form-group"><label>Frequência / Canal</label><input type="text" id="radio_freq" placeholder="Ex: 5825 MHz"></div>
+            </div>
+        </fieldset>
 
-        <div class="form-group">
-            <label for="detalhes">Informações Adicionais (Porta, IP, MAC, etc.)</label>
-            <textarea id="detalhes" rows="3"></textarea>
-        </div>
+        <fieldset>
+            <legend>Evidências e Observações</legend>
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label for="foto_instalacao">Foto da Instalação / Print (Opcional)</label>
+                <input type="file" id="foto_instalacao" accept="image/*">
+            </div>
+            <div class="form-group">
+                <label for="detalhes">Informações Adicionais</label>
+                <textarea id="detalhes" rows="2"></textarea>
+            </div>
+        </fieldset>
 
-        <button type="submit">Salvar Documentação</button>
+        <button type="submit" id="btnSalvar">Salvar Documentação Completa</button>
+        <a href="lista.html" class="btn-link">Visualizar clientes cadastrados</a>
     </form>
 </div>
 
-<script>
-    // Este script captura o clique no botão salvar
-    document.getElementById('docForm').addEventListener('submit', function(event) {
-        event.preventDefault(); // Evita que a página recarregue
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        // Captura os dados digitados
-        const dadosDoCliente = {
-            cliente: document.getElementById('cliente').value,
-            pppoe: document.getElementById('pppoe').value,
-            vlan_servico: document.getElementById('vlan_servico').value,
-            vlan_gerencia: document.getElementById('vlan_gerencia').value,
-            meio_fisico: document.getElementById('meio_fisico').value,
-            detalhes: document.getElementById('detalhes').value
-        };
+    // ⚠️ COLE AQUI AS SUAS CHAVES DO FIREBASE
+    const firebaseConfig = {
+	apiKey: "AIzaSyAQz3Eup4L9zBinD3igcJ-bzMp71DHhO3Y",
+	authDomain: "caes-5850d.firebaseapp.com",
+	projectId: "caes-5850d",
+	storageBucket: "caes-5850d.firebasestorage.app",
+	messagingSenderId: "78167199590",
+	appId: "1:78167199590:web:31799b57fb5846130cc2a7"
+    };
 
-        console.log("Dados prontos para serem enviados ao banco de dados:", dadosDoCliente);
-        alert("Dados capturados com sucesso! Pressione F12 para ver no console.");
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+    const auth = getAuth(app);
+
+    let tecnicoEmail = "";
+
+    // Proteção de Rota
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            tecnicoEmail = user.email;
+            document.getElementById('usuarioLogado').innerText = tecnicoEmail;
+        } else {
+            window.location.href = "login.html";
+        }
+    });
+
+    // Sair do sistema
+    document.getElementById('btnSair').addEventListener('click', () => {
+        signOut(auth).then(() => window.location.href = "login.html");
+    });
+
+    // Exibir/Ocultar blocos dinâmicos
+    document.getElementById('meio_fisico').addEventListener('change', function(e) {
+        document.getElementById('bloco_olt').classList.add('oculto');
+        document.getElementById('bloco_radio').classList.add('oculto');
+        
+        if (e.target.value === 'OLT') document.getElementById('bloco_olt').classList.remove('oculto');
+        else if (e.target.value === 'Rádio') document.getElementById('bloco_radio').classList.remove('oculto');
+    });
+
+    // Submeter formulário
+    document.getElementById('docForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
+        const btnSalvar = document.getElementById('btnSalvar');
+        btnSalvar.disabled = true;
+
+        try {
+            let fotoUrl = null;
+            const inputFoto = document.getElementById('foto_instalacao');
+
+            if (inputFoto.files.length > 0) {
+                btnSalvar.innerText = "Enviando foto (1/2)...";
+                const arquivo = inputFoto.files[0];
+                const nomeArquivo = Date.now() + "_" + arquivo.name;
+                const storageRef = ref(storage, 'fotos_clientes/' + nomeArquivo);
+                await uploadBytes(storageRef, arquivo);
+                fotoUrl = await getDownloadURL(storageRef);
+            }
+
+            btnSalvar.innerText = "Salvando dados no banco (2/2)...";
+
+            const dadosDoCliente = {
+                tecnico_responsavel: tecnicoEmail,
+                cliente: document.getElementById('cliente').value,
+                status: document.getElementById('status').value,
+                contato_tecnico: document.getElementById('contato_tecnico').value,
+                plano: document.getElementById('plano').value,
+                pppoe: document.getElementById('pppoe').value,
+                ip_fixo: document.getElementById('ip_fixo').value,
+                vlan_servico: document.getElementById('vlan_servico').value,
+                vlan_gerencia: document.getElementById('vlan_gerencia').value,
+                meio_fisico: document.getElementById('meio_fisico').value,
+                mac_address: document.getElementById('mac_address').value,
+                olt_cto: document.getElementById('olt_cto').value,
+                olt_sinal: document.getElementById('olt_sinal').value,
+                radio_ssid: document.getElementById('radio_ssid').value,
+                radio_freq: document.getElementById('radio_freq').value,
+                detalhes: document.getElementById('detalhes').value,
+                foto_link: fotoUrl, 
+                data_cadastro: new Date().toISOString()
+            };
+
+            await addDoc(collection(db, "clientes_pme"), dadosDoCliente);
+            alert("Documentação salva com sucesso!");
+            
+            document.getElementById('docForm').reset();
+            document.getElementById('bloco_olt').classList.add('oculto');
+            document.getElementById('bloco_radio').classList.add('oculto');
+            window.scrollTo(0, 0);
+
+        } catch (erro) {
+            console.error("Erro:", erro);
+            alert("Ocorreu um erro ao salvar.");
+        } finally {
+            btnSalvar.disabled = false;
+            btnSalvar.innerText = "Salvar Documentação Completa";
+        }
     });
 </script>
 
