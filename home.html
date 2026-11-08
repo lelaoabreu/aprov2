@@ -6,7 +6,7 @@
     <title>Menu Principal - Sistema PME</title>
     <style>
         body { font-family: Arial, sans-serif; background-color: #f4f7f6; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .container { max-width: 800px; width: 100%; margin-top: 50px; }
+        .container { max-width: 800px; width: 100%; margin-top: 20px; }
         
         .cabecalho-sistema { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ccc; padding-bottom: 15px; margin-bottom: 40px; width: 100%; }
         .info-usuario { font-size: 16px; color: #555; }
@@ -35,16 +35,22 @@
         .cartao h2 { margin-bottom: 15px; font-size: 22px; color: #0056b3; }
         .cartao p { font-size: 15px; color: #666; }
         
-        /* Cartão de cadastro com cor diferente (opcional) */
-        .cartao-cadastro { border-top-color: #28a745; }
-        .cartao-cadastro h2 { color: #28a745; }
+        /* Cartões com cores diferentes */
+        .cartao-pme { border-top-color: #28a745; }
+        .cartao-pme h2 { color: #28a745; }
+
+        .cartao-dedicado { border-top-color: #ff9900; }
+        .cartao-dedicado h2 { color: #ff9900; }
     </style>
 </head>
 <body>
 
 <div class="container">
-	<div style="text-align: center; margin-bottom: 20px;">
+    <!-- Logo da sua empresa centralizada no topo -->
+    <div style="text-align: center; margin-bottom: 20px;">
         <img src="logo.png" alt="Logo do Provedor" style="max-height: 70px;">
+    </div>
+
     <div class="cabecalho-sistema">
         <span class="info-usuario">Olá, <strong id="usuarioLogado">Verificando...</strong></span>
         <a id="btnSair" class="btn-sair">Sair do Sistema</a>
@@ -58,9 +64,16 @@
             <p>Consultar documentações salvas, gerar PDFs e pesquisar circuitos.</p>
         </a>
 
-        <a href="index.html" class="cartao cartao-cadastro">
-            <h2>➕ Nova Documentação</h2>
-            <p>Cadastrar um novo link PME, dados de rede e evidências de instalação.</p>
+        <!-- Botão atualizado para pme.html -->
+        <a href="pme.html" class="cartao cartao-pme">
+            <h2>➕ Internet PME</h2>
+            <p>Cadastrar novo link PME, dados de rede e evidências da instalação.</p>
+        </a>
+
+        <!-- Espaço já preparado para o Link Dedicado -->
+        <a href="dedicado.html" class="cartao cartao-dedicado">
+            <h2>➕ Link Dedicado</h2>
+            <p>Novo Cadastro de circuito dedicado empresarial (Em breve).</p>
         </a>
     </div>
 </div>
@@ -71,21 +84,21 @@
 
     // ⚠️ COLE AQUI AS SUAS CHAVES DO FIREBASE
     const firebaseConfig = {
-      apiKey: "AIzaSyAQz3Eup4L9zBinD3igcJ-bzMp71DHhO3Y",
-		  authDomain: "caes-5850d.firebaseapp.com",
-		  projectId: "caes-5850d",
-		  storageBucket: "caes-5850d.firebasestorage.app",
-		  messagingSenderId: "78167199590",
-		  appId: "1:78167199590:web:31799b57fb5846130cc2a7"
+        apiKey: "AIzaSyAQz3Eup4L9zBinD3igcJ-bzMp71DHhO3Y",
+		authDomain: "caes-5850d.firebaseapp.com",
+		projectId: "caes-5850d",
+		storageBucket: "caes-5850d.firebasestorage.app",
+		messagingSenderId: "78167199590",
+		appId: "1:78167199590:web:31799b57fb5846130cc2a7"
     };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
 
-    // Proteção de Rota - Redireciona para o login se não estiver autenticado
+    // Proteção de Rota
     onAuthStateChanged(auth, (user) => {
         if (user) {
-            document.getElementById('usuarioLogado').innerText = user.email.split('@')[0]; // Mostra só o nome antes do @
+            document.getElementById('usuarioLogado').innerText = user.email.split('@')[0];
         } else {
             window.location.href = "login.html";
         }
